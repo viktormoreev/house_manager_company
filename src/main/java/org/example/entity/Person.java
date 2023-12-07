@@ -1,4 +1,4 @@
 package org.example.entity;
 
-public class Employee {
+public class Person {
 }
