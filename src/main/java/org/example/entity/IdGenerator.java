@@ -11,5 +11,4 @@ public class IdGenerator {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-
 }

@@ -1,9 +1,6 @@
 package org.example.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import java.math.BigDecimal;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -14,7 +11,13 @@ public class Apartment extends IdGenerator{
     @Column(name = "area")
     private double area;
 
-    @OneToMany
-    private List<Person> living;
+    @OneToMany(mappedBy = "apartment")
+    private List<Living> living;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Owner owner;
+
+    @OneToMany(mappedBy = "apartment")
+    private List<Pet> pets;
 
 }
