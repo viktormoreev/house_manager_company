@@ -1,6 +1,5 @@
 package org.example.entity;
 
-import com.sun.istack.NotNull;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,9 +14,6 @@ public class Company extends IdGenerator{
 
     @OneToMany(mappedBy = "company")
     private List<BuildingManager> buildingManagers;
-
-    @OneToMany(mappedBy = "company")
-    private List<Building> buildings;
 
     public Company() {
     }

@@ -1,6 +1,5 @@
 package org.example.entity;
 
-import com.sun.istack.NotNull;
 
 import javax.persistence.*;
 import java.util.List;
@@ -13,8 +12,8 @@ public class Owner extends IdGenerator{
     @Column(name = "name", nullable = false)
     private String name;
 
-    @OneToOne
-    private Apartment apartment;
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<Apartment> apartments;
 
 
 }

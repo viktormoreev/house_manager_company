@@ -1,6 +1,5 @@
 package org.example.entity;
 
-import com.sun.istack.NotNull;
 
 import javax.persistence.*;
 import java.util.List;
@@ -17,14 +16,10 @@ public class Building extends IdGenerator{
     @ManyToOne(fetch = FetchType.LAZY)
     private BuildingManager buildingManager;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private Company company;
-
     @OneToMany(mappedBy = "building")
     private List<Apartment> apartments;
 
-    public Building(int floors, String address, Company company) {
-        this.company=company;
+    public Building(int floors, String address) {
         this.floors = floors;
         this.address = address;
     }

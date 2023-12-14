@@ -20,13 +20,13 @@ public class Apartment extends IdGenerator{
     @OneToMany(mappedBy = "apartment")
     private List<Living> living;
 
-    @OneToOne(mappedBy = "apartment")
-    private Owner owner;
+    @ManyToMany(mappedBy = "apartments")
+    private List<Owner> owners;
 
     @Column(name = "pet_using_common_areas")
-    private boolean pet_using_common_areas;
+    private int pet_using_common_areas;
 
-    public Apartment(int number, double area, Building building, boolean pet_using_common_areas) {
+    public Apartment(int number, double area, Building building, int pet_using_common_areas) {
         this.number = number;
         this.area = area;
         this.building = building;
@@ -68,19 +68,19 @@ public class Apartment extends IdGenerator{
         this.living = living;
     }
 
-    public Owner getOwner() {
-        return owner;
+    public List<Owner> getOwners() {
+        return owners;
     }
 
-    public void setOwner(Owner owner) {
-        this.owner = owner;
+    public void setOwners(List<Owner> owners) {
+        this.owners = owners;
     }
 
-    public boolean isPet_using_common_areas() {
+    public int getPet_using_common_areas() {
         return pet_using_common_areas;
     }
 
-    public void setPet_using_common_areas(boolean pet_using_common_areas) {
+    public void setPet_using_common_areas(int pet_using_common_areas) {
         this.pet_using_common_areas = pet_using_common_areas;
     }
 }
