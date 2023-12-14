@@ -1,7 +1,7 @@
 package org.example.errors;
 
-public class BuildingManagerNotFoundException extends RuntimeException {
+public class BuildingManagerNotFoundException extends Exception {
     public BuildingManagerNotFoundException(Long id) {
-        super("Company with id " + id + " is not found");
+        super("Building Manager with id " + id + " is not found");
     }
 }

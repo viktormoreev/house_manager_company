@@ -8,17 +8,14 @@ import org.example.errors.CompanyNotFoundException;
 import org.example.errors.NoBuildingManagersInTheCompanyException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.query.criteria.internal.expression.function.AggregationFunction;
-
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+
 
 public class BuildingDao {
 
-    public static void createBuilding(Building building, Long companyId ){
+    public static void createBuilding(Building building, Long companyId ) throws CompanyNotFoundException, NoBuildingManagersInTheCompanyException {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
             Company company = session.get(Company.class,companyId);

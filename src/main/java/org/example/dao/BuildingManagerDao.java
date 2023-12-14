@@ -6,9 +6,7 @@ import org.example.entity.BuildingManager;
 import org.example.entity.Company;
 import org.example.errors.BuildingManagerNotFoundException;
 import org.example.errors.CompanyNotFoundException;
-import org.example.errors.ThereIsOnlyOneManagerException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import javax.persistence.TypedQuery;
@@ -20,21 +18,16 @@ import java.util.List;
 
 public class BuildingManagerDao {
 
-    public static void createBuildingManager(Long companyId, BuildingManager buildingManager){
+    public static void createBuildingManager(Long companyId, BuildingManager buildingManager) throws CompanyNotFoundException {
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
-
             Transaction transaction = session.beginTransaction();
             Company company = session.get(Company.class,companyId);
-
             if(company==null)throw new CompanyNotFoundException(companyId);
             else {
                 buildingManager.setCompany(company);
                 company.getBuildingManagers().add(buildingManager);
-
-
                 session.save(buildingManager);
-
                 transaction.commit();
             }
         }
@@ -62,7 +55,7 @@ public class BuildingManagerDao {
         return buildingManagers;
     }
 
-    public static List<BuildingManager> getBuildingManagersByCompanyId(Long companyId){
+    public static List<BuildingManager> getBuildingManagersByCompanyId(Long companyId) throws CompanyNotFoundException {
         List<BuildingManager> buildingManagers;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
@@ -93,7 +86,7 @@ public class BuildingManagerDao {
 
     }
 
-    public static void deleteBuildingManager(Long buildingManagerId){
+    public static void deleteBuildingManager(Long buildingManagerId) throws BuildingManagerNotFoundException {
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
@@ -111,11 +104,7 @@ public class BuildingManagerDao {
 
             List<Building> buildingsToTransfer = new ArrayList<>(buildingManager.getBuildings());
             int numOfManagers = buildingManagers.size();
-            if(numOfManagers==0){
-                throw new ThereIsOnlyOneManagerException("There is only one manager left, so you cant delete him ;)");
-            }
             int index = 0;
-
             for (Building building : buildingsToTransfer) {
                 BuildingManager targetManager = buildingManagers.get(index);
                 building.setBuildingManager(targetManager);

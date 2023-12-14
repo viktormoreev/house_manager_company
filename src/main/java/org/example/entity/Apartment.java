@@ -4,6 +4,7 @@ import com.sun.istack.NotNull;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Apartment extends IdGenerator{
@@ -18,18 +19,17 @@ public class Apartment extends IdGenerator{
     private Building building;
 
     @OneToMany(mappedBy = "apartment")
-    private List<Living> living;
+    private Set<Living> living;
 
     @ManyToMany(mappedBy = "apartments")
-    private List<Owner> owners;
+    private Set<Owner> owners;
 
     @Column(name = "pet_using_common_areas")
     private int pet_using_common_areas;
 
-    public Apartment(int number, double area, Building building, int pet_using_common_areas) {
+    public Apartment(int number, double area, int pet_using_common_areas) {
         this.number = number;
         this.area = area;
-        this.building = building;
         this.pet_using_common_areas = pet_using_common_areas;
     }
 
@@ -60,19 +60,19 @@ public class Apartment extends IdGenerator{
         this.building = building;
     }
 
-    public List<Living> getLiving() {
+    public Set<Living> getLiving() {
         return living;
     }
 
-    public void setLiving(List<Living> living) {
+    public void setLiving(Set<Living> living) {
         this.living = living;
     }
 
-    public List<Owner> getOwners() {
+    public Set<Owner> getOwners() {
         return owners;
     }
 
-    public void setOwners(List<Owner> owners) {
+    public void setOwners(Set<Owner> owners) {
         this.owners = owners;
     }
 

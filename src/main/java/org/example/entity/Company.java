@@ -4,7 +4,7 @@ package org.example.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Company extends IdGenerator{
@@ -13,7 +13,7 @@ public class Company extends IdGenerator{
     private String name;
 
     @OneToMany(mappedBy = "company")
-    private List<BuildingManager> buildingManagers;
+    private Set<BuildingManager> buildingManagers;
 
     public Company() {
     }
@@ -30,11 +30,11 @@ public class Company extends IdGenerator{
         this.name = name;
     }
 
-    public List<BuildingManager> getBuildingManagers() {
+    public Set<BuildingManager> getBuildingManagers() {
         return buildingManagers;
     }
 
-    public void setBuildingManagers(List<BuildingManager> buildingManagers) {
+    public void setBuildingManagers(Set<BuildingManager> buildingManagers) {
         this.buildingManagers = buildingManagers;
     }
 }

@@ -3,6 +3,7 @@ package org.example.entity;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Building extends IdGenerator{
@@ -17,7 +18,7 @@ public class Building extends IdGenerator{
     private BuildingManager buildingManager;
 
     @OneToMany(mappedBy = "building")
-    private List<Apartment> apartments;
+    private Set<Apartment> apartments;
 
     public Building(int floors, String address) {
         this.floors = floors;
@@ -49,5 +50,13 @@ public class Building extends IdGenerator{
 
     public void setBuildingManager(BuildingManager buildingManager) {
         this.buildingManager = buildingManager;
+    }
+
+    public Set<Apartment> getApartments() {
+        return apartments;
+    }
+
+    public void setApartments(Set<Apartment> apartments) {
+        this.apartments = apartments;
     }
 }

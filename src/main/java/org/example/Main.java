@@ -1,37 +1,44 @@
 package org.example;
 
 import org.example.configuration.SessionFactoryUtil;
-import org.example.dao.ApartmentDao;
-import org.example.dao.BuildingDao;
-import org.example.dao.BuildingManagerDao;
-import org.example.dao.CompanyDao;
-import org.example.entity.Apartment;
-import org.example.entity.Building;
-import org.example.entity.BuildingManager;
-import org.example.entity.Company;
+import org.example.dao.*;
+import org.example.entity.*;
+import org.example.errors.ApartmentNotFoundException;
+import org.example.errors.BuildingNotFoundException;
+import org.example.errors.OwnerNotFoundException;
+
+import javax.xml.crypto.Data;
+import java.text.DateFormat;
+import java.time.LocalDate;
 
 public class Main {
     public static void main(String[] args) {
         System.out.println("Hello world!");
         SessionFactoryUtil.getSessionFactory().openSession();
-        BuildingManagerDao.deleteBuildingManager(3L);
-        //BuildingManagerDao.getBuildingManagersByCompanyId(1L);
-        //Company company1 = new Company("Gosho-OOD");
-        //BuildingManager buildingManager = new BuildingManager("Mitko");
-        //BuildingManagerDao.createBuildingManager(1L,buildingManager);
-        //CompanyDao.createCompany(company1);
 /*
-        Company company1 = new Company("Boqna-OOD");
-        // BuildingManager buildingManager = new BuildingManager("Gosho");
-        //BuildingManagerDao.createBuildingManager(buildingManager);
-        //CompanyDao.createCompany(company1);
-
+        Company company1 = new Company("Gosho-OOD");
+        CompanyDao.createCompany(company1);
+        BuildingManager buildingManager = new BuildingManager("Gosho");
+        BuildingManagerDao.createBuildingManager(1L,buildingManager);
         Building building1 = new Building(3,"Izgrev");
-        building1.setId(2L);
-        Apartment apartment1 = new Apartment(5,75.6,building1,2);
-        ApartmentDao.createApartment(apartment1 );
-        //BuildingDao.createBuilding(building1);
-        //BuildingDao.getBuildings();
+        BuildingDao.createBuilding(building1,1L);
+        Apartment apartment1 = new Apartment(6,75.6 ,2);
+        ApartmentDao.createApartment(apartment1 , 1L );
+        Living living = new Living("Georgi",true, LocalDate.of(2004,9,28));
+        try {
+            LivingDao.createLiving(living,1L);
+        } catch (ApartmentNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        */
+        /*
+        Owner owner=new Owner("Gosho");
+        try {
+            OwnerDao.createOwner(owner,1L);
+        } catch (ApartmentNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 */
+
     }
 }

@@ -1,6 +1,6 @@
 package org.example.errors;
 
-public class NoBuildingManagersInTheCompanyException extends RuntimeException {
+public class NoBuildingManagersInTheCompanyException extends Exception {
 
     public NoBuildingManagersInTheCompanyException(String message) {
         super(message);
