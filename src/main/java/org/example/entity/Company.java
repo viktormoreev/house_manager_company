@@ -1,11 +1,18 @@
 package org.example.entity;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import java.util.Set;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class Company extends IdGenerator{
 
@@ -15,26 +22,8 @@ public class Company extends IdGenerator{
     @OneToMany(mappedBy = "company")
     private Set<BuildingManager> buildingManagers;
 
-    public Company() {
+    public Company (String name){
+        this.name=name;
     }
 
-    public Company(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Set<BuildingManager> getBuildingManagers() {
-        return buildingManagers;
-    }
-
-    public void setBuildingManagers(Set<BuildingManager> buildingManagers) {
-        this.buildingManagers = buildingManagers;
-    }
 }

@@ -43,23 +43,19 @@ public class OwnerDao {
 
 
     public static void updateOwner(Owner owner){
-
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
             session.saveOrUpdate(owner);
             transaction.commit();
         }
-
     }
 
     public static void deleteOwner(Owner owner){
-
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
             session.delete(owner);
             transaction.commit();
         }
-
     }
 
     public static void addApartmentToOwner(Long ownerId, Long apartmentId) throws ApartmentNotFoundException, OwnerNotFoundException {
@@ -78,6 +74,5 @@ public class OwnerDao {
             transaction.commit();
         }
     }
-
 
 }

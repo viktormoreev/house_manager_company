@@ -1,10 +1,17 @@
 package org.example.entity;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
-import java.util.List;
+
 import java.util.Set;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class Building extends IdGenerator{
 
@@ -20,43 +27,19 @@ public class Building extends IdGenerator{
     @OneToMany(mappedBy = "building")
     private Set<Apartment> apartments;
 
+    @OneToOne(mappedBy = "building")
+    private BuildingTaxes buildingTaxes;
+
     public Building(int floors, String address) {
         this.floors = floors;
         this.address = address;
     }
 
-    public Building() {
-    }
-
-    public int getFloors() {
-        return floors;
-    }
-
-    public void setFloors(int floors) {
-        this.floors = floors;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public BuildingManager getBuildingManager() {
-        return buildingManager;
-    }
-
-    public void setBuildingManager(BuildingManager buildingManager) {
-        this.buildingManager = buildingManager;
-    }
-
-    public Set<Apartment> getApartments() {
-        return apartments;
-    }
-
-    public void setApartments(Set<Apartment> apartments) {
-        this.apartments = apartments;
+    @Override
+    public String toString() {
+        return "Building{" +
+                "floors=" + floors +
+                ", address='" + address + '\'' +
+                "} " + super.toString();
     }
 }

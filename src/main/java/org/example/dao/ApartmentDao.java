@@ -33,6 +33,7 @@ public class ApartmentDao {
         Apartment apartment;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
+
             apartment = session.get(Apartment.class , id);
             transaction.commit();
         }

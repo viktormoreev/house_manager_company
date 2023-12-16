@@ -1,10 +1,16 @@
 package org.example.entity;
 
 import com.sun.istack.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class BuildingManager extends IdGenerator{
 
@@ -17,34 +23,14 @@ public class BuildingManager extends IdGenerator{
     @OneToMany(mappedBy = "buildingManager")
     private List<Building> buildings;
 
-    public BuildingManager(String name) {
-        this.name = name;
+    public BuildingManager(String name){
+        this.name=name;
     }
 
-    public BuildingManager() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Company getCompany() {
-        return company;
-    }
-
-    public void setCompany(Company company) {
-        this.company = company;
-    }
-
-    public List<Building> getBuildings() {
-        return buildings;
-    }
-
-    public void setBuildings(List<Building> buildings) {
-        this.buildings = buildings;
+    @Override
+    public String toString() {
+        return "BuildingManager{" +
+                "name='" + name + '\'' +
+                "} " + super.toString();
     }
 }

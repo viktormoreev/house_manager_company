@@ -1,56 +1,45 @@
 package org.example.dao;
 
 import org.example.configuration.SessionFactoryUtil;
+import org.example.dto.BuildingManagerDTO;
 import org.example.entity.Building;
 import org.example.entity.BuildingManager;
 import org.example.entity.Company;
+import org.example.errors.BuildingManagerNotFoundException;
 import org.example.errors.CompanyNotFoundException;
 import org.example.errors.NoBuildingManagersInTheCompanyException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import java.util.Comparator;
 import java.util.List;
+
+import static java.lang.Math.min;
 
 
 public class BuildingDao {
 
-    public static void createBuilding(Building building, Long companyId ) throws CompanyNotFoundException, NoBuildingManagersInTheCompanyException {
+    public static void addBuilding(Building building, Long companyId ) throws CompanyNotFoundException, NoBuildingManagersInTheCompanyException, BuildingManagerNotFoundException {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
-            Company company = session.get(Company.class,companyId);
-            if(company==null)throw new CompanyNotFoundException(companyId);
-            else{
-                CriteriaBuilder cb =session.getCriteriaBuilder();
-                CriteriaQuery<BuildingManager> cr = cb.createQuery(BuildingManager.class);
-                Root<BuildingManager> root = cr.from(BuildingManager.class);
+            Company company = CompanyDao.findCompany(session,companyId);
+            List<BuildingManager> buildingManagers = CompanyDao.getBuildingManagersByCompanyId(companyId);
+            if (buildingManagers.isEmpty())throw new NoBuildingManagersInTheCompanyException("No building managers found for creating the building");
+            BuildingManager managerWithLeastBuildings = buildingManagers.stream()
+                    .min(Comparator.comparingInt(manager -> {
+                        try {
+                            return BuildingManagerDao.getBuildingsByBuildingManagerId(manager.getId()).size();
+                        } catch (BuildingManagerNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }))
+                    .orElse(null);
 
-                Join<BuildingManager, Building> buildingJoin = root.join("buildings", JoinType.LEFT);
-                cr.select(root).where(cb.equal(root.get("company").get("id"),companyId))
-                        .groupBy(root)
-                        .orderBy(cb.asc(cb.count(buildingJoin)));
-
-                TypedQuery<BuildingManager> typedQuery = session.createQuery(cr);
-                typedQuery.setMaxResults(1);
-
-                List<BuildingManager> result = typedQuery.getResultList();
-
-                if (!result.isEmpty()) {
-                    BuildingManager managerWithLeastBuildings = result.get(0);
-
-                    // Associate the Building with the identified BuildingManager
-                    building.setBuildingManager(managerWithLeastBuildings);
-                    managerWithLeastBuildings.getBuildings().add(building);
-
-                    // Save the Building and update the BuildingManager
-                    session.save(building);
-                    session.update(managerWithLeastBuildings);
-                }
-                else{
-                    throw new NoBuildingManagersInTheCompanyException("No building managers found for creating the building");
-                }
-                transaction.commit();
-            }
+            building.setBuildingManager(managerWithLeastBuildings);
+            session.save(building);
+            session.update(managerWithLeastBuildings);
+            transaction.commit();
         }
     }
 
