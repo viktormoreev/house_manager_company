@@ -19,7 +19,6 @@ public class LivingDao {
             if(apartment==null)throw new ApartmentNotFoundException(apartmentId);
             else {
                 living.setApartment(apartment);
-                apartment.getLiving().add(living);
                 session.save(living);
                 transaction.commit();
             }

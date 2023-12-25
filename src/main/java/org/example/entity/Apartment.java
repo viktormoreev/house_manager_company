@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -27,9 +28,14 @@ public class Apartment extends IdGenerator{
     private Set<Living> living;
 
     @ManyToMany(mappedBy = "apartments")
-    private Set<Owner> owners;
+    private Set<Owner> owners = new HashSet<>();
 
     @Column(name = "pet_using_common_areas")
     private int pet_using_common_areas;
 
+    public Apartment(int number, double area, int pet_using_common_areas) {
+        this.number = number;
+        this.area = area;
+        this.pet_using_common_areas = pet_using_common_areas;
+    }
 }
