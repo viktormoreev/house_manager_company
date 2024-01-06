@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -20,7 +21,9 @@ public class Owner extends IdGenerator{
     private String name;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    private Set<Apartment> apartments;
+    private Set<Apartment> apartments = new HashSet<>();
 
-
+    public Owner(String name) {
+        this.name = name;
+    }
 }

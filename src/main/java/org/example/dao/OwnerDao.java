@@ -15,19 +15,13 @@ import java.util.Set;
 
 public class OwnerDao {
 
-    public static void create(Owner owner, Long apartmentId) throws ApartmentNotFoundException {
+
+
+    public static void createOwner(Owner owner)  {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
-            Apartment apartment = session.get(Apartment.class,apartmentId);
-            if(apartment==null)throw new ApartmentNotFoundException(apartmentId);
-            else {
-                Set<Apartment> apartments= new HashSet<>();
-                apartments.add(apartment);
-                owner.setApartments(apartments);
-                apartment.getOwners().add(owner);
-                session.save(owner);
-                transaction.commit();
-            }
+            session.save(owner);
+            transaction.commit();
         }
     }
 

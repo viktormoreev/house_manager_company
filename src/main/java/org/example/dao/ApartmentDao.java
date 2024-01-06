@@ -1,10 +1,7 @@
 package org.example.dao;
 
 import org.example.configuration.SessionFactoryUtil;
-import org.example.entity.Apartment;
-import org.example.entity.Building;
-import org.example.entity.Company;
-import org.example.entity.Owner;
+import org.example.entity.*;
 import org.example.errors.ApartmentNotFoundException;
 import org.example.errors.BuildingNotFoundException;
 import org.example.errors.CompanyNotFoundException;
@@ -95,17 +92,29 @@ public class ApartmentDao {
 
     }
 
-    public static void addOwnerToApartment(Long apartmentId, Long ownerId) throws ApartmentNotFoundException, OwnerNotFoundException {
+    public static void addOwnerToApartment(Long ownerId, Long apartmentId) throws ApartmentNotFoundException, OwnerNotFoundException {
+        try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
+            Transaction transaction = session.beginTransaction();
+            Apartment apartment = session.get(Apartment.class,apartmentId);
+            Owner owner = session.get(Owner.class,ownerId);
+            if(apartment==null){
+                throw new ApartmentNotFoundException(apartmentId);
+            };
+            apartment.getOwners().add(owner);
+            owner.getApartments().add(apartment);
+            transaction.commit();
+        }
+    }
+
+    public static void addLivingToApartment(Living living, Long apartmentId) throws ApartmentNotFoundException {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
             Apartment apartment = session.get(Apartment.class,apartmentId);
             if(apartment==null){
                 throw new ApartmentNotFoundException(apartmentId);
             };
-            Owner owner=session.get(Owner.class,ownerId);
-            if(owner==null){
-                throw new OwnerNotFoundException(ownerId);
-            }
+            apartment.getLiving().add(living);
+            living.setApartment(apartment);
             transaction.commit();
         }
     }
