@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class OwnerDao {
 
-    public static void createOwner(Owner owner, Long apartmentId) throws ApartmentNotFoundException {
+    public static void create(Owner owner, Long apartmentId) throws ApartmentNotFoundException {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
             Apartment apartment = session.get(Apartment.class,apartmentId);
@@ -31,7 +31,7 @@ public class OwnerDao {
         }
     }
 
-    public static Owner getOwnerById(long id){
+    public static Owner getById(long id){
         Owner owner;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
@@ -42,7 +42,7 @@ public class OwnerDao {
     }
 
 
-    public static void updateOwner(Owner owner){
+    public static void update(Owner owner){
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
             session.saveOrUpdate(owner);
@@ -50,7 +50,7 @@ public class OwnerDao {
         }
     }
 
-    public static void deleteOwner(Owner owner){
+    public static void delete(Owner owner){
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
             session.delete(owner);

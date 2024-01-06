@@ -1,55 +1,89 @@
 package org.example.dao;
 
 import org.example.configuration.SessionFactoryUtil;
-import org.example.dto.BuildingManagerDTO;
 import org.example.entity.Building;
 import org.example.entity.BuildingManager;
 import org.example.entity.Company;
 import org.example.errors.BuildingManagerNotFoundException;
+import org.example.errors.BuildingNotFoundException;
 import org.example.errors.CompanyNotFoundException;
 import org.example.errors.NoBuildingManagersInTheCompanyException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import java.util.Comparator;
-import java.util.List;
 
-import static java.lang.Math.min;
+import javax.persistence.criteria.*;
+import java.math.BigInteger;
+import java.util.List;
 
 
 public class BuildingDao {
 
-    public static void addBuilding(Building building, Long companyId ) throws CompanyNotFoundException, NoBuildingManagersInTheCompanyException, BuildingManagerNotFoundException {
+    public static Long findManagerWithLeastBuildings(Long companyId){
+        try(Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+
+            // Native SQL query with parameter
+            String sqlQuery = "SELECT MIN(bm.id) AS building_manager_id " +
+                    "FROM building_manager bm " +
+                    "LEFT JOIN building b ON bm.id = b.buildingManager_id " +
+                    "WHERE bm.company_id = :companyId " +
+                    "GROUP BY bm.id " +
+                    "ORDER BY COUNT(b.buildingManager_id) ASC " +
+                    "LIMIT 1";
+
+            BigInteger buildingManagerId = (BigInteger) session.createSQLQuery(sqlQuery)
+                    .setParameter("companyId", companyId)
+                    .uniqueResult();
+
+            return buildingManagerId.longValue();
+        }
+    }
+
+    public static void create (Building building, Long companyId ){
+
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
-            Company company = CompanyDao.findCompany(session,companyId);
-            List<BuildingManager> buildingManagers = CompanyDao.getBuildingManagersByCompanyId(companyId);
-            if (buildingManagers.isEmpty())throw new NoBuildingManagersInTheCompanyException("No building managers found for creating the building");
-            BuildingManager managerWithLeastBuildings = buildingManagers.stream()
-                    .min(Comparator.comparingInt(manager -> {
-                        try {
-                            return BuildingManagerDao.getBuildingsByBuildingManagerId(manager.getId()).size();
-                        } catch (BuildingManagerNotFoundException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }))
-                    .orElse(null);
 
-            building.setBuildingManager(managerWithLeastBuildings);
-            session.save(building);
-            session.update(managerWithLeastBuildings);
+            BuildingManager buildingManager = null;
+            try {
+                buildingManager = BuildingManagerDao.findBuildingManager(session , BuildingDao.findManagerWithLeastBuildings(companyId));
+            } catch (BuildingManagerNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            building.setBuildingManager(buildingManager);
+            session.saveOrUpdate(building);
             transaction.commit();
         }
+
+    }
+
+    public static void changeBuilding(Session session, Building building, Long companyId)  {
+        Transaction transaction = session.beginTransaction();
+        BuildingManager buildingManager = null;
+        try {
+            buildingManager = BuildingManagerDao.findBuildingManager(session , BuildingDao.findManagerWithLeastBuildings(companyId));
+        } catch (BuildingManagerNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        building.setBuildingManager(buildingManager);
+        session.saveOrUpdate(building);
+        transaction.commit();
     }
 
 
 
-    public static Building getBuildingById(long id){
+    public static Building getById(long id){
         Building building;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
             building = session.get(Building.class , id);
+            if(building == null){
+                try {
+                    throw new BuildingNotFoundException(id);
+                } catch (BuildingNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             transaction.commit();
         }
         return building;

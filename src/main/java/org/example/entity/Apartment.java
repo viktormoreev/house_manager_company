@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Data
@@ -18,7 +19,7 @@ public class Apartment extends IdGenerator{
     private int number;
 
     @Column(name = "area", nullable = false)
-    private double area;
+    private BigDecimal area;
 
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
     private Building building;
@@ -29,7 +30,25 @@ public class Apartment extends IdGenerator{
     @ManyToMany(mappedBy = "apartments")
     private Set<Owner> owners;
 
-    @Column(name = "pet_using_common_areas")
-    private int pet_using_common_areas;
+    @Column(name = "pet")
+    private int pet;
 
+    @OneToMany(mappedBy = "apartment")
+    private Set<TaxesToPay> taxesToPay;
+
+    public Apartment(int number, BigDecimal area, int pet) {
+        this.number = number;
+        this.area = area;
+        this.pet = pet;
+    }
+
+    @Override
+    public String toString() {
+        return "Apartment{" +
+                "number=" + number +
+                ", area=" + area +
+                ", building=" + building +
+                ", pet=" + pet +
+                "} " + super.toString();
+    }
 }

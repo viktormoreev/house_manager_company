@@ -11,31 +11,40 @@ import org.example.errors.CompanyNotFoundException;
 import org.example.errors.OwnerNotFoundException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 public class ApartmentDao {
-    public static void createApartment(Apartment apartment, Long buildingId) throws BuildingNotFoundException {
+    public static void create(Apartment apartment, Long buildingId)  {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
             Building building = session.get(Building.class,buildingId);
-            if(building==null)throw new BuildingNotFoundException(buildingId);
+            if(building==null) try {
+                throw new BuildingNotFoundException(buildingId);
+            } catch (BuildingNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             else {
                 apartment.setBuilding(building);
-                building.getApartments().add(apartment);
                 session.save(apartment);
                 transaction.commit();
             }
         }
     }
 
-    public static Apartment getApartmentById(long id){
+    public static Apartment getById(long id){
         Apartment apartment;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
-
             apartment = session.get(Apartment.class , id);
+            if(apartment==null)throw  new ApartmentNotFoundException(id);
             transaction.commit();
+        } catch (ApartmentNotFoundException e) {
+            throw new RuntimeException(e);
         }
         return apartment;
     }
@@ -49,6 +58,21 @@ public class ApartmentDao {
             transaction.commit();
         }
         return apartments;
+    }
+
+    public static List<Apartment> getApartmentsByBuildingId(Long buildingId){
+
+        try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Apartment> cr = cb.createQuery(Apartment.class);
+            Root<Apartment> root = cr.from(Apartment.class);
+            Building building = BuildingDao.getById(buildingId);
+            cr.select(root).where(cb.equal(root.get("building"),building));
+            Query<Apartment> query = session.createQuery(cr);
+            List<Apartment> apartments = query.getResultList();
+            return apartments;
+        }
+
     }
 
     public static void updateApartment(Apartment apartment){

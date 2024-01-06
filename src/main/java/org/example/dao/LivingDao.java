@@ -2,31 +2,34 @@ package org.example.dao;
 
 import org.example.configuration.SessionFactoryUtil;
 import org.example.entity.Apartment;
+import org.example.entity.Building;
 import org.example.entity.Living;
 
 import org.example.errors.ApartmentNotFoundException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 public class LivingDao {
 
-    public static void createLiving(Living living, Long apartmentId) throws ApartmentNotFoundException {
+    public static void create(Living living, Long apartmentId){
+
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
-            Apartment apartment = session.get(Apartment.class,apartmentId);
-            if(apartment==null)throw new ApartmentNotFoundException(apartmentId);
-            else {
-                living.setApartment(apartment);
-                apartment.getLiving().add(living);
-                session.save(living);
-                transaction.commit();
-            }
+            Apartment apartment = ApartmentDao.getById(apartmentId);
+            living.setApartment(apartment);
+            session.save(living);
+            transaction.commit();
         }
+
     }
 
-    public static Living getLivingById(long id){
+    public static Living getById(long id){
         Living living;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
@@ -47,7 +50,23 @@ public class LivingDao {
         return livings;
     }
 
-    public static void updateLiving(Living living){
+    public static List<Living> getLivingByApartmentId(Long apartmentId){
+
+        try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Living> cr = cb.createQuery(Living.class);
+            Root<Living> root = cr.from(Living.class);
+            Apartment apartment = ApartmentDao.getById(apartmentId);
+            cr.select(root).where(cb.equal(root.get("apartment"),apartment));
+            Query<Living> query = session.createQuery(cr);
+            List<Living> livings = query.getResultList();
+            return livings;
+        }
+
+    }
+
+
+    public static void update(Living living){
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
@@ -57,7 +76,7 @@ public class LivingDao {
 
     }
 
-    public static void deleteLiving(Living living){
+    public static void delete(Living living){
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();

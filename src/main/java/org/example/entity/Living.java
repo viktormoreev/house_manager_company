@@ -24,8 +24,12 @@ public class Living extends IdGenerator {
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate date_of_birth;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Apartment apartment;
 
-
+    public Living(String name, boolean use_elevator, LocalDate date_of_birth) {
+        this.name = name;
+        this.use_elevator = use_elevator;
+        this.date_of_birth = date_of_birth;
+    }
 }

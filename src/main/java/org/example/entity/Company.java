@@ -26,4 +26,11 @@ public class Company extends IdGenerator{
         this.name=name;
     }
 
+    @Override
+    public String toString() {
+        return "Company{" +
+                "name='" + name + '\'' +
+                ", buildingManagers=" + buildingManagers +
+                "} " + super.toString();
+    }
 }

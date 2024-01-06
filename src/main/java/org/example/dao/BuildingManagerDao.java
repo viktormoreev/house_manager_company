@@ -17,11 +17,12 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class BuildingManagerDao {
 
-    public static void addBuildingManager(BuildingManager buildingManager, Long companyId) throws CompanyNotFoundException {
+    public static void create(BuildingManager buildingManager, Long companyId) {
         try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
             Company company = CompanyDao.findCompany(session, companyId);
@@ -32,10 +33,15 @@ public class BuildingManagerDao {
     }
 
 
-    public static BuildingManagerDTO getBuildingManagerById(long id) throws BuildingManagerNotFoundException {
+    public static BuildingManagerDTO getById(long id) {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
-            BuildingManager buildingManager= findBuildingManager(session,id);
+            BuildingManager buildingManager= null;
+            try {
+                buildingManager = findBuildingManager(session,id);
+            } catch (BuildingManagerNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             BuildingManagerDTO buildingManagerDTO = EntityMapper.mapBuildingManagerToDTO(buildingManager);
             transaction.commit();
             return buildingManagerDTO;
@@ -55,39 +61,42 @@ public class BuildingManagerDao {
     }
 
 
-    public static void updateBuildingManager(BuildingManager buildingManager, Long buildingManagerId) throws BuildingManagerNotFoundException {
+    public static void update(BuildingManager buildingManager, Long buildingManagerId)  {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
-            BuildingManager oldBuildingManager = findBuildingManager(session, buildingManagerId);
+            try {
+                BuildingManager oldBuildingManager = findBuildingManager(session, buildingManagerId);
+            } catch (BuildingManagerNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             buildingManager.setId(buildingManagerId);
             session.saveOrUpdate(buildingManager);
             transaction.commit();
         }
     }
 
-    public static void deleteBuildingManager(Long buildingManagerId) throws BuildingManagerNotFoundException {
+    public static void fire(Long buildingManagerId) {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
-            Transaction transaction = session.beginTransaction();
-            BuildingManager buildingManager = findBuildingManager(session,buildingManagerId);
-            List<Building> buildingsToTransfer = new ArrayList<>(buildingManager.getBuildings());
-            session.delete(buildingManager);
-            buildingsToTransfer.stream().forEach(building -> {
-                try {
-                    BuildingDao.addBuilding(building,buildingManager.getId());
-                } catch (CompanyNotFoundException e) {
-                    throw new RuntimeException(e);
-                } catch (NoBuildingManagersInTheCompanyException | BuildingManagerNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
+            BuildingManager buildingManager = null;
+            try {
+                buildingManager = findBuildingManager(session,buildingManagerId);
+            } catch (BuildingManagerNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            Company company = buildingManager.getCompany();
+            buildingManager.setCompany(null);
+
+            buildingManager.getBuildings().stream().toList().forEach(building -> {
+                BuildingDao.changeBuilding(session,building,company.getId());
             });
-            transaction.commit();
         }
     }
 
-    public static List<Building> getBuildingsByBuildingManagerId(Long buildingManagerId) throws BuildingManagerNotFoundException {
+
+
+    public static List<Building> getBuildingsByBuildingManagerId(Long buildingManagerId) {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
-            BuildingManager buildingManager = findBuildingManager(session,buildingManagerId);
             CriteriaBuilder cb =session.getCriteriaBuilder();
             CriteriaQuery<Building> cr = cb.createQuery(Building.class);
             Root<Building> root = cr.from(Building.class);
@@ -96,6 +105,7 @@ public class BuildingManagerDao {
             List <Building> buildings= typedQuery.getResultList();
             transaction.commit();
             return buildings;
+
         }
     }
 
@@ -105,5 +115,18 @@ public class BuildingManagerDao {
         return buildingManager;
     }
 
+    public static void delete(Long buildingManagerId)  {
+        try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
+            Transaction transaction = session.beginTransaction();
+            BuildingManager buildingManager=null;
+            try {
+                buildingManager = BuildingManagerDao.findBuildingManager(session,buildingManagerId);
+            } catch (BuildingManagerNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            session.delete(buildingManager);
+            transaction.commit();
+        }
+    }
 
 }
