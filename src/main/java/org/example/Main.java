@@ -2,25 +2,21 @@ package org.example;
 
 import org.example.configuration.SessionFactoryUtil;
 import org.example.dao.*;
-import org.example.entity.*;
-
-import org.example.errors.CompanyNotFoundException;
-import org.example.errors.NoCompaniesException;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
-
-import org.example.errors.*;
-
-import java.time.LocalDate;
+import org.example.errors.ApartmentNotFoundException;
+import org.example.errors.OwnerNotFoundException;
 
 
 public class Main {
     public static void main(String[] args) {
         SessionFactoryUtil.getSessionFactory().openSession();
 
-        BuildingTaxDao.payTaxForApartment(3l,BigDecimal.valueOf(10));
+        try {
+            ApartmentDao.addOwnerToApartment(3l,1l);
+        } catch (ApartmentNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (OwnerNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 

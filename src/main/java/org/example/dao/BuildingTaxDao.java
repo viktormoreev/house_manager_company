@@ -2,6 +2,8 @@ package org.example.dao;
 
 import org.example.configuration.SessionFactoryUtil;
 import org.example.entity.*;
+import org.example.errors.ApartmentNotFoundException;
+import org.example.errors.BuildingNotFoundException;
 import org.example.errors.BuildingTaxNotFoundException;
 import org.example.errors.InvalidValueForAmountException;
 import org.example.write_file.FiscalBill;
@@ -24,7 +26,14 @@ import java.util.List;
 
 public class BuildingTaxDao {
 
-    public static void create (BuildingTaxes buildingTaxes, Long buildingId){
+    /**
+     * Creates a new BuildingTaxes record and associates it with a specific building.
+     *
+     * @param buildingTaxes The BuildingTaxes object to be created and persisted.
+     * @param buildingId The ID of the building to which the taxes will be associated.
+     * @throws BuildingNotFoundException If a building with the specified ID does not exist.
+     */
+    public static void create (BuildingTaxes buildingTaxes, Long buildingId) throws BuildingNotFoundException {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
 
@@ -36,6 +45,12 @@ public class BuildingTaxDao {
         }
     }
 
+    /**
+     * Retrieves building taxes by its ID.
+     *
+     * @param id The ID of the BuildingTaxes to retrieve.
+     * @return The found BuildingTaxes object.
+     */
     public static BuildingTaxes getBuildingTaxesById(long id){
         BuildingTaxes buildingTaxes;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
@@ -46,6 +61,12 @@ public class BuildingTaxDao {
         return buildingTaxes;
     }
 
+    /**
+     * Retrieves taxes to pay by its ID.
+     *
+     * @param id The ID of the TaxesToPay to retrieve.
+     * @return The found TaxesToPay object.
+     */
     public static TaxesToPay getTaxesToPayById(long id){
 
         TaxesToPay taxesToPay;
@@ -58,6 +79,12 @@ public class BuildingTaxDao {
     }
 
 
+    /**
+     * Updates the details of an existing BuildingTaxes record.
+     *
+     * @param buildingTaxes The updated BuildingTaxes object.
+     * @param id The ID of the BuildingTaxes record to be updated.
+     */
     public static void update(BuildingTaxes buildingTaxes, Long id){
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
@@ -82,6 +109,12 @@ public class BuildingTaxDao {
 
     }
 
+
+    /**
+     * Deletes a BuildingTaxes record by its ID.
+     *
+     * @param id The ID of the BuildingTaxes record to be deleted.
+     */
     public static void delete(Long id){
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
@@ -91,7 +124,13 @@ public class BuildingTaxDao {
         }
     }
 
-    public static void addTaxToPayForApartment (Long apartmentId){
+    /**
+     * Adds tax obligations for a specific apartment.
+     *
+     * @param apartmentId The ID of the apartment for which taxes are to be calculated and added.
+     * @throws ApartmentNotFoundException If an apartment with the specified ID does not exist.
+     */
+    public static void addTaxToPayForApartment (Long apartmentId) throws ApartmentNotFoundException {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
             Apartment apartment = ApartmentDao.getById(apartmentId);
@@ -121,16 +160,32 @@ public class BuildingTaxDao {
         }
     }
 
-    public static void addTaxToPayForBuilding(Long buildingId){
+    /**
+     * Adds tax obligations for all apartments in a specific building.
+     *
+     * @param buildingId The ID of the building for which taxes are to be calculated and added for all apartments.
+     * @throws BuildingNotFoundException If a building with the specified ID does not exist.
+     */
+    public static void addTaxToPayForBuilding(Long buildingId) throws BuildingNotFoundException {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
 
             Building building = BuildingDao.getById(buildingId);
             ApartmentDao.getApartmentsByBuildingId(buildingId).stream().forEach(apartment -> {
-                addTaxToPayForApartment(apartment.getId());
+                try {
+                    addTaxToPayForApartment(apartment.getId());
+                } catch (ApartmentNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             });
         }
     }
 
+    /**
+     * Processes the payment of taxes for a specific apartment.
+     *
+     * @param taxesToPayId The ID of the TaxesToPay record to be updated.
+     * @param amount The amount to be paid.
+     */
     public static void payTaxForApartment(Long taxesToPayId, BigDecimal amount){
         if(amount.compareTo(BigDecimal.valueOf(0))<=0) try {
             throw new InvalidValueForAmountException(amount);
@@ -156,6 +211,12 @@ public class BuildingTaxDao {
         }
     }
 
+    /**
+     * Writes a fiscal bill for a paid tax.
+     *
+     * @param taxesToPayId The ID of the TaxesToPay record for which the bill is written.
+     * @param amount The amount paid.
+     */
     public static void writeFiscalBill(Long taxesToPayId, BigDecimal amount){
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
             String fileName = "paid.txt";

@@ -1,22 +1,20 @@
 package org.example.dao;
 
 import org.example.configuration.SessionFactoryUtil;
-import org.example.entity.Apartment;
 import org.example.entity.Owner;
-import org.example.errors.ApartmentNotFoundException;
-import org.example.errors.OwnerNotFoundException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class OwnerDao {
 
 
 
+    /**
+     * Creates a new Owner and persists it to the database.
+     *
+     * @param owner The Owner object to be created and persisted.
+     */
     public static void createOwner(Owner owner)  {
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
@@ -25,6 +23,12 @@ public class OwnerDao {
         }
     }
 
+    /**
+     * Retrieves an Owner entity by its ID.
+     *
+     * @param id The ID of the Owner to retrieve.
+     * @return The found Owner object.
+     */
     public static Owner getById(long id){
         Owner owner;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
@@ -36,6 +40,11 @@ public class OwnerDao {
     }
 
 
+    /**
+     * Updates the details of an existing Owner entity.
+     *
+     * @param owner The Owner object with updated information to be saved.
+     */
     public static void update(Owner owner){
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
@@ -44,29 +53,20 @@ public class OwnerDao {
         }
     }
 
-    public static void delete(Owner owner){
+    /**
+     * Deletes an Owner entity from the database by its ID.
+     *
+     * @param ownerId The ID of the Owner to be deleted.
+     */
+    public static void delete(Long ownerId){
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
+            Owner owner = session.get(Owner.class,ownerId);
             session.delete(owner);
             transaction.commit();
         }
     }
 
-    public static void addApartmentToOwner(Long ownerId, Long apartmentId) throws ApartmentNotFoundException, OwnerNotFoundException {
-        try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
-            Transaction transaction = session.beginTransaction();
-            Apartment apartment = session.get(Apartment.class,apartmentId);
-            if(apartment==null){
-                throw new ApartmentNotFoundException(apartmentId);
-            };
-            Owner owner=session.get(Owner.class,ownerId);
-            if(owner==null){
-                throw new OwnerNotFoundException(ownerId);
-            }
-            owner.getApartments().add(apartment);
-            apartment.getOwners().add(owner);
-            transaction.commit();
-        }
-    }
+
 
 }

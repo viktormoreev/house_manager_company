@@ -20,6 +20,12 @@ import java.util.List;
 
 public class BuildingDao {
 
+    /**
+     * Finds the ID of the building manager who manages the least number of buildings in a given company.
+     *
+     * @param companyId The ID of the company to search within.
+     * @return The ID of the building manager with the least buildings.
+     */
     public static Long findManagerWithLeastBuildings(Long companyId){
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
 
@@ -40,17 +46,22 @@ public class BuildingDao {
         }
     }
 
-    public static void create (Building building, Long companyId ){
+    /**
+     * Creates a new building and associates it with a building manager who has the least number of buildings.
+     *
+     * @param building The Building object to be created and persisted.
+     * @param companyId The ID of the company to which the building is to be associated.
+     * @throws BuildingManagerNotFoundException If no building manager can be found.
+     */
+    public static void create (Building building, Long companyId ) throws BuildingManagerNotFoundException {
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
 
             BuildingManager buildingManager = null;
-            try {
-                buildingManager = BuildingManagerDao.findBuildingManager(session , BuildingDao.findManagerWithLeastBuildings(companyId));
-            } catch (BuildingManagerNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+
+            buildingManager = BuildingManagerDao.findBuildingManager(session , BuildingDao.findManagerWithLeastBuildings(companyId));
+
             building.setBuildingManager(buildingManager);
             session.saveOrUpdate(building);
             transaction.commit();
@@ -58,38 +69,49 @@ public class BuildingDao {
 
     }
 
-    public static void changeBuilding(Session session, Building building, Long companyId)  {
+    /**
+     * Changes the building manager of an existing building to the one who currently manages the least number of buildings.
+     *
+     * @param session The current Hibernate session.
+     * @param building The building to update.
+     * @param companyId The company ID to search for a building manager within.
+     * @throws BuildingManagerNotFoundException If no building manager can be found.
+     */
+    public static void changeBuilding(Session session, Building building, Long companyId) throws BuildingManagerNotFoundException {
         Transaction transaction = session.beginTransaction();
         BuildingManager buildingManager = null;
-        try {
-            buildingManager = BuildingManagerDao.findBuildingManager(session , BuildingDao.findManagerWithLeastBuildings(companyId));
-        } catch (BuildingManagerNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+
+        buildingManager = BuildingManagerDao.findBuildingManager(session , BuildingDao.findManagerWithLeastBuildings(companyId));
+
         building.setBuildingManager(buildingManager);
         session.saveOrUpdate(building);
         transaction.commit();
     }
 
 
-
-    public static Building getById(long id){
+    /**
+     * Retrieves a building by its ID.
+     *
+     * @param id The ID of the building to retrieve.
+     * @return The found Building object.
+     * @throws BuildingNotFoundException If no building is found with the given ID.
+     */
+    public static Building getById(long id) throws BuildingNotFoundException {
         Building building;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
             building = session.get(Building.class , id);
-            if(building == null){
-                try {
-                    throw new BuildingNotFoundException(id);
-                } catch (BuildingNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            if(building == null)throw new BuildingNotFoundException(id);
             transaction.commit();
         }
         return building;
     }
 
+    /**
+     * Retrieves all buildings in the database.
+     *
+     * @return A list of all Building objects.
+     */
     public static List<Building> getBuildings(){
         List<Building> buildings;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
@@ -101,6 +123,11 @@ public class BuildingDao {
         return buildings;
     }
 
+    /**
+     * Updates the details of an existing building.
+     *
+     * @param building The Building object to update.
+     */
     public static void updateBuilding(Building building){
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
@@ -111,6 +138,11 @@ public class BuildingDao {
 
     }
 
+    /**
+     * Deletes a building from the database.
+     *
+     * @param building The Building object to be deleted.
+     */
     public static void deleteBuilding(Building building){
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
@@ -121,6 +153,12 @@ public class BuildingDao {
 
     }
 
+    /**
+     * Calculates the total due amount for a specific building based on taxes to pay.
+     *
+     * @param buildingId The ID of the building.
+     * @return The total due amount as a BigDecimal.
+     */
     public static BigDecimal buildingDueAmount(Long buildingId) {
         BigDecimal totalDueAmount = BigDecimal.ZERO; // Default to zero
         try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
@@ -138,6 +176,12 @@ public class BuildingDao {
         return totalDueAmount;
     }
 
+    /**
+     * Calculates the total income for a specific building based on taxes paid.
+     *
+     * @param buildingId The ID of the building.
+     * @return The total income as a BigDecimal.
+     */
     public static BigDecimal buildingIncome(Long buildingId) {
         BigDecimal totalIncome = BigDecimal.ZERO; // Default to zero
         try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
@@ -155,6 +199,12 @@ public class BuildingDao {
         return totalIncome;
     }
 
+    /**
+     * Finds a building based on a tax ID.
+     *
+     * @param taxesToPayId The tax ID associated with the building.
+     * @return The Building object associated with the given tax ID.
+     */
     public static Building findBuildingByTaxId( Long taxesToPayId){
         try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
             String jpql = "SELECT b " +

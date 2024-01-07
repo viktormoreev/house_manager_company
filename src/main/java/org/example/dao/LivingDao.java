@@ -20,7 +20,14 @@ import java.util.List;
 
 public class LivingDao {
 
-    public static void create(Living living, Long apartmentId){
+    /**
+     * Creates a new Living entity and associates it with an existing apartment.
+     *
+     * @param living The Living object to be created and persisted.
+     * @param apartmentId The ID of the Apartment to which the Living entity will be associated.
+     * @throws ApartmentNotFoundException If an apartment with the specified ID does not exist.
+     */
+    public static void create(Living living, Long apartmentId) throws ApartmentNotFoundException {
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             Transaction transaction = session.beginTransaction();
@@ -32,6 +39,12 @@ public class LivingDao {
 
     }
 
+    /**
+     * Retrieves a Living entity by its ID.
+     *
+     * @param id The ID of the Living entity to retrieve.
+     * @return The found Living object.
+     */
     public static Living getById(long id){
         Living living;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
@@ -42,6 +55,11 @@ public class LivingDao {
         return living;
     }
 
+    /**
+     * Retrieves all Living entities in the database.
+     *
+     * @return A list of all Living objects.
+     */
     public static List<Living> getLivings(){
         List<Living> livings;
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
@@ -53,7 +71,14 @@ public class LivingDao {
         return livings;
     }
 
-    public static List<Living> getLivingByApartmentId(Long apartmentId){
+    /**
+     * Retrieves all Living entities associated with a specific apartment.
+     *
+     * @param apartmentId The ID of the Apartment.
+     * @return A list of Living objects associated with the specified apartment.
+     * @throws ApartmentNotFoundException If an apartment with the specified ID does not exist.
+     */
+    public static List<Living> getLivingByApartmentId(Long apartmentId) throws ApartmentNotFoundException {
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -68,15 +93,27 @@ public class LivingDao {
 
     }
 
+    /**
+     * Retrieves all Living entities associated with a specific building.
+     *
+     * @param buildingId The ID of the Building.
+     * @return A list of Living objects associated with the specified building.
+     */
     public static List<Living> getLivingByBuildingId(Long buildingId){
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
             List<Living> livingList=new ArrayList<>();
             ApartmentDao.getApartmentsByBuildingId(buildingId).stream().forEach(apartment ->
             {
-                getLivingByApartmentId(apartment.getId()).stream().forEach(living -> {
-                    livingList.add(living);
-                });
+
+                try {
+                    getLivingByApartmentId(apartment.getId()).stream().forEach(living -> {
+                        livingList.add(living);
+                    });
+                } catch (ApartmentNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+
             });
             return livingList;
 
@@ -85,6 +122,11 @@ public class LivingDao {
     }
 
 
+    /**
+     * Updates the details of an existing Living entity.
+     *
+     * @param living The Living object to update.
+     */
     public static void update(Living living){
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
@@ -95,6 +137,11 @@ public class LivingDao {
 
     }
 
+    /**
+     * Deletes a Living entity from the database.
+     *
+     * @param living The Living object to be deleted.
+     */
     public static void delete(Living living){
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
@@ -105,6 +152,11 @@ public class LivingDao {
 
     }
 
+    /**
+     * Retrieves all Living entities sorted by name and age.
+     *
+     * @return A sorted list of Living objects by name and age.
+     */
     public static List<Living> livingsByNameAndAge (){
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
