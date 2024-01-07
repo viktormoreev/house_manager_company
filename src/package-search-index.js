@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.example"},{"l":"org.example.configuration"},{"l":"org.example.dao"},{"l":"org.example.dto"},{"l":"org.example.entity"},{"l":"org.example.errors"},{"l":"org.example.mapper"},{"l":"org.example.write_file"}];updateSearchResults();
