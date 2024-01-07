@@ -16,6 +16,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -126,6 +127,90 @@ public class BuildingManagerDao {
             }
             session.delete(buildingManager);
             transaction.commit();
+        }
+    }
+
+    public static List<BuildingManager> buildingManagersByBuildingAndName() {
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+
+            String hql = "SELECT bm FROM BuildingManager bm " +
+                    "JOIN bm.buildings b " +
+                    "ORDER BY bm.name, b.id";
+
+            List<BuildingManager> buildingManagerList = session.createQuery(hql, BuildingManager.class).getResultList();
+
+            return buildingManagerList;
+        }
+    }
+
+    public static List<BuildingManager> buildingManagersSortedByName() {
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+
+            String hql = "SELECT DISTINCT bm FROM BuildingManager bm " +
+                    "LEFT JOIN FETCH bm.buildings"; // Ensure we fetch buildings to avoid lazy loading issues.
+
+            List<BuildingManager> buildingManagerList = session.createQuery(hql, BuildingManager.class).getResultList();
+
+            Comparator<BuildingManager> byName = Comparator.comparing(BuildingManager::getName);
+
+            Comparator<BuildingManager> byBuildingSize = Comparator
+                    .comparing((BuildingManager bm) -> bm.getBuildings().size())
+                    .reversed();
+
+            buildingManagerList.sort(byName.thenComparing(byBuildingSize));
+
+            return buildingManagerList;
+        }
+    }
+
+    public static BigDecimal buildingManagerDueAmount(Long buildingManagerId) {
+        BigDecimal totalDueAmount = BigDecimal.ZERO; // Default to zero
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            String jpql = "SELECT SUM(tp.toPay) AS TotalIncome " +
+                    "FROM BuildingManager bm " +
+                    "JOIN bm.buildings b " +
+                    "JOIN b.apartments a " +
+                    "JOIN a.taxesToPay tp " +
+                    "WHERE bm.id =:buildingManagerId";
+
+            totalDueAmount = session.createQuery(jpql, BigDecimal.class)
+                    .setParameter("buildingManagerId", buildingManagerId) // Assuming the ID is of type Long
+                    .getSingleResult();
+        }
+
+        return totalDueAmount;
+    }
+
+    public static BigDecimal buildingManagerIncome(Long buildingManagerId) {
+        BigDecimal totalIncome = BigDecimal.ZERO; // Default to zero
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            String jpql = "SELECT SUM(tp.payed) AS TotalIncome " +
+                    "FROM BuildingManager bm " +
+                    "JOIN bm.buildings b " +
+                    "JOIN b.apartments a " +
+                    "JOIN a.taxesToPay tp " +
+                    "WHERE bm.id =:buildingManagerId";
+
+            totalIncome = session.createQuery(jpql, BigDecimal.class)
+                    .setParameter("buildingManagerId", buildingManagerId) // Assuming the ID is of type Long
+                    .getSingleResult();
+        }
+
+        return totalIncome;
+    }
+
+    public static BuildingManager findBuildingManagerByTaxId( Long taxesToPayId){
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            String jpql = "SELECT bm " +
+                    "FROM TaxesToPay tp " +
+                    "JOIN tp.apartment a " +
+                    "JOIN a.building b " +
+                    "JOIN b.buildingManager bm " +
+                    "WHERE tp.id =:taxesToPayId";
+            BuildingManager buildingManager  = session.createQuery(jpql, BuildingManager.class)
+                    .setParameter("taxesToPayId", taxesToPayId)
+                    .getSingleResult();
+            return buildingManager;
         }
     }
 

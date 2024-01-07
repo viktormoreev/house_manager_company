@@ -32,4 +32,13 @@ public class Living extends IdGenerator {
         this.use_elevator = use_elevator;
         this.date_of_birth = date_of_birth;
     }
+
+    @Override
+    public String toString() {
+        return "Living{" +
+                "name='" + name + '\'' +
+                ", use_elevator=" + use_elevator +
+                ", date_of_birth=" + date_of_birth +
+                "} " + super.toString();
+    }
 }

@@ -1,0 +1,41 @@
+
+ Date: 2024-01-07
+ Company: DHL
+ Building Manager: Angel
+ Building: 1
+ Building address: vitosha
+ Apartment: 1
+ Tax: 10
+
+ Date: 2024-01-07
+ Company: DHL
+ Building Manager: Angel
+ Building: 1
+ Building address: vitosha
+ Apartment: 1
+ Tax: 10
+
+ Date: 2024-01-07
+ Company: DHL
+ Building Manager: Angel
+ Building: 1
+ Building address: vitosha
+ Apartment: 1
+ Tax: 10
+
+ Date: 2024-01-07
+ Company: DHL
+ Building Manager: Angel
+ Building: 1
+ Building address: vitosha
+ Apartment: 1
+ Tax: 10
+
+ Date: 2024-01-07
+ Company: BulgariAir
+ Building Manager: Gosho
+ Building: 2
+ Building address: vitosha
+ Apartment: 2
+ Tax: 10
+

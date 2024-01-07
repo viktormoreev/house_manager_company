@@ -4,6 +4,7 @@ import org.example.configuration.SessionFactoryUtil;
 import org.example.entity.*;
 import org.example.errors.BuildingTaxNotFoundException;
 import org.example.errors.InvalidValueForAmountException;
+import org.example.write_file.FiscalBill;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.NativeQuery;
@@ -12,6 +13,9 @@ import org.hibernate.query.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -112,8 +116,6 @@ public class BuildingTaxDao {
             TaxesToPay taxesToPay = new TaxesToPay(LocalDate.now(), finalTax, BigDecimal.valueOf(0), apartment);
             session.save(taxesToPay);
 
-
-            System.out.println(finalTax);
             transaction.commit();
 
         }
@@ -129,7 +131,6 @@ public class BuildingTaxDao {
         }
     }
 
-
     public static void payTaxForApartment(Long taxesToPayId, BigDecimal amount){
         if(amount.compareTo(BigDecimal.valueOf(0))<=0) try {
             throw new InvalidValueForAmountException(amount);
@@ -142,20 +143,36 @@ public class BuildingTaxDao {
             TaxesToPay taxesToPay = getTaxesToPayById(taxesToPayId);
             BigDecimal oldTax = taxesToPay.getToPay();
             BigDecimal oldPaid = taxesToPay.getPayed();
-            if( oldTax.subtract(amount ).compareTo(BigDecimal.valueOf(0)) >0 ){
-                taxesToPay.setToPay(oldTax.subtract(amount));
-                taxesToPay.setPayed(oldPaid.add(amount));
-            }
+            if( oldTax.subtract(amount).compareTo(BigDecimal.valueOf(0)) >0 );
             else{
-                taxesToPay.setToPay(BigDecimal.valueOf(0));
-                taxesToPay.setPayed(oldPaid.add(oldTax));
+                amount = oldTax;
             }
+            taxesToPay.setToPay(oldTax.subtract(amount));
+            taxesToPay.setPayed(oldPaid.add(amount));
+            writeFiscalBill(taxesToPayId,amount);
             session.saveOrUpdate(taxesToPay);
 
             transaction.commit();
         }
-
     }
+
+    public static void writeFiscalBill(Long taxesToPayId, BigDecimal amount){
+        try(Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            String fileName = "paid.txt";
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+                Company company = CompanyDao.findCompanyByTaxId(taxesToPayId);
+                BuildingManager buildingManager = BuildingManagerDao.findBuildingManagerByTaxId(taxesToPayId);
+                Building building = BuildingDao.findBuildingByTaxId(taxesToPayId);
+                Apartment apartment = ApartmentDao.findApartmentByTaxId(taxesToPayId);
+                FiscalBill fiscalBill = new FiscalBill(company, buildingManager, building, apartment, amount);
+                writer.write(fiscalBill.toString());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+
 
 
 }

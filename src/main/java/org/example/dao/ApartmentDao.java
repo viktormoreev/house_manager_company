@@ -10,6 +10,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -60,13 +61,14 @@ public class ApartmentDao {
     public static List<Apartment> getApartmentsByBuildingId(Long buildingId){
 
         try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
+            Transaction transaction = session.beginTransaction();
             CriteriaBuilder cb = session.getCriteriaBuilder();
             CriteriaQuery<Apartment> cr = cb.createQuery(Apartment.class);
             Root<Apartment> root = cr.from(Apartment.class);
-            Building building = BuildingDao.getById(buildingId);
-            cr.select(root).where(cb.equal(root.get("building"),building));
-            Query<Apartment> query = session.createQuery(cr);
-            List<Apartment> apartments = query.getResultList();
+            cr.select(root).where(cb.equal(root.get("building").get("id"),buildingId));
+            TypedQuery<Apartment> typedQuery = session.createQuery(cr);
+            List<Apartment> apartments = typedQuery.getResultList();
+            transaction.commit();
             return apartments;
         }
 
@@ -116,6 +118,21 @@ public class ApartmentDao {
             apartment.getLiving().add(living);
             living.setApartment(apartment);
             transaction.commit();
+        }
+    }
+
+    public static Apartment findApartmentByTaxId( Long taxesToPayId){
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            String jpql = "SELECT a " +
+                    "FROM TaxesToPay tp " +
+                    "JOIN tp.apartment a " +
+                    "WHERE tp.id =:taxesToPayId";
+
+            Apartment apartment = session.createQuery(jpql, Apartment.class)
+                    .setParameter("taxesToPayId", taxesToPayId)
+                    .getSingleResult();
+
+            return apartment;
         }
     }
 

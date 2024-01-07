@@ -48,7 +48,6 @@ public class Apartment extends IdGenerator{
         return "Apartment{" +
                 "number=" + number +
                 ", area=" + area +
-                ", building=" + building +
                 ", pet=" + pet +
                 "} " + super.toString();
     }

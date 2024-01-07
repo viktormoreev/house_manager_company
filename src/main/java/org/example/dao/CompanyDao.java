@@ -13,6 +13,7 @@ import org.hibernate.Transaction;
 import javax.persistence.*;
 import javax.persistence.criteria.*;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -119,11 +120,9 @@ public class CompanyDao {
         return company;
     }
 
-    public static List<Company> companiesByInitialCapital(){
+    public static List<Company> companiesByIncome() {
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
 
-        try(Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-            /*
             String hql = "SELECT c FROM Company c " +
                     "JOIN c.buildingManagers bm " +
                     "JOIN bm.buildings b " +
@@ -132,34 +131,15 @@ public class CompanyDao {
                     "GROUP BY c " +
                     "ORDER BY SUM(tp.payed) DESC";
 
+            List<Company> companyList = session.createQuery(hql, Company.class).getResultList();
 
-            List<Company> companies = session.createQuery(hql, Company.class).getResultList();
-
-            String sqlQuery = "SELECT MIN(bm.id) AS building_manager_id " +
-                    "FROM building_manager bm " +
-                    "LEFT JOIN building b ON bm.id = b.buildingManager_id " +
-                    "WHERE bm.company_id = :companyId " +
-                    "GROUP BY bm.id " +
-                    "ORDER BY COUNT(b.buildingManager_id) ASC " +
-                    "LIMIT 1";
-
-            BigInteger buildingManagerId = (BigInteger) session.createSQLQuery(sqlQuery)
-                    .setParameter("companyId", companyId)
-                    .uniqueResult();
-
-
-             */
-            List<Company> companies = session.createQuery("FROM Company", Company.class).getResultList();
-            System.out.println(companies.isEmpty());
-            transaction.commit();
-            return companies;
+            return companyList;
         }
     }
 
     public static BigDecimal companyIncome(Long companyId) {
         BigDecimal totalIncome = BigDecimal.ZERO; // Default to zero
         try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
-
             String jpql = "SELECT SUM(tp.payed) AS TotalIncome " +
                     "FROM Company c " +
                     "JOIN c.buildingManagers bm " +
@@ -169,14 +149,48 @@ public class CompanyDao {
                     "WHERE c.id =:companyId";
 
             totalIncome = session.createQuery(jpql, BigDecimal.class)
-                    .setParameter("companyId", 1L) // Assuming the ID is of type Long
+                    .setParameter("companyId", companyId) // Assuming the ID is of type Long
                     .getSingleResult();
+        }
 
+        return totalIncome;
     }
+
+    public static BigDecimal companyDueAmount(Long companyId) {
+        BigDecimal totalIncome = BigDecimal.ZERO; // Default to zero
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            String jpql = "SELECT SUM(tp.toPay) AS TotalIncome " +
+                    "FROM Company c " +
+                    "JOIN c.buildingManagers bm " +
+                    "JOIN bm.buildings b " +
+                    "JOIN b.apartments a " +
+                    "JOIN a.taxesToPay tp " +
+                    "WHERE c.id =:companyId";
+
+            totalIncome = session.createQuery(jpql, BigDecimal.class)
+                    .setParameter("companyId", companyId) // Assuming the ID is of type Long
+                    .getSingleResult();
+        }
+
         return totalIncome;
     }
 
 
+    public static Company findCompanyByTaxId( Long taxesToPayId){
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            String jpql = "SELECT c " +
+                    "FROM TaxesToPay tp " +
+                    "JOIN tp.apartment a " +
+                    "JOIN a.building b " +
+                    "JOIN b.buildingManager bm " +
+                    "JOIN bm.company c " +
+                    "WHERE tp.id =:taxesToPayId";
+            Company company = session.createQuery(jpql, Company.class)
+                    .setParameter("taxesToPayId", taxesToPayId)
+                    .getSingleResult();
+            return company;
+        }
+    }
 
 
 }

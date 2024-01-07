@@ -20,22 +20,7 @@ public class Main {
     public static void main(String[] args) {
         SessionFactoryUtil.getSessionFactory().openSession();
 
-        /*
-        Company company = new Company("DHL");
-        CompanyDao.create(company);
-        BuildingManager buildingManager = new BuildingManager("Gosho");
-        BuildingManagerDao.create(buildingManager,1l);
-        Building building =new Building(10,"vitosha");
-        BuildingDao.create(building,1l);
-        Apartment apartment = new Apartment(10,BigDecimal.valueOf(10),4);
-        ApartmentDao.create(apartment,1l);
-        BuildingTaxes buildingTaxes = new BuildingTaxes(BigDecimal.valueOf(10),BigDecimal.valueOf(5),BigDecimal.valueOf(3));
-        BuildingTaxDao.create(buildingTaxes,1l);
-        BuildingTaxDao.addTaxToPayForApartment(1l);
-        */
-        //BuildingTaxDao.addTaxToPayForApartment(1l);
-        System.out.println(CompanyDao.companyIncome(1L));
-
+        BuildingTaxDao.payTaxForApartment(3l,BigDecimal.valueOf(10));
 
     }
 

@@ -3,6 +3,7 @@ package org.example.dao;
 import org.example.configuration.SessionFactoryUtil;
 import org.example.entity.Apartment;
 import org.example.entity.Building;
+import org.example.entity.BuildingManager;
 import org.example.entity.Living;
 
 import org.example.errors.ApartmentNotFoundException;
@@ -13,6 +14,8 @@ import org.hibernate.query.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class LivingDao {
@@ -65,6 +68,22 @@ public class LivingDao {
 
     }
 
+    public static List<Living> getLivingByBuildingId(Long buildingId){
+
+        try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
+            List<Living> livingList=new ArrayList<>();
+            ApartmentDao.getApartmentsByBuildingId(buildingId).stream().forEach(apartment ->
+            {
+                getLivingByApartmentId(apartment.getId()).stream().forEach(living -> {
+                    livingList.add(living);
+                });
+            });
+            return livingList;
+
+        }
+
+    }
+
 
     public static void update(Living living){
 
@@ -84,6 +103,21 @@ public class LivingDao {
             transaction.commit();
         }
 
+    }
+
+    public static List<Living> livingsByNameAndAge (){
+
+        try(Session session = SessionFactoryUtil.getSessionFactory().openSession()){
+
+
+            List<Living> livingList = session.createQuery("Select l From org.example.entity.Living l ",Living.class).getResultList();
+
+            Comparator<Living> byName = Comparator.comparing(Living::getName);
+            Comparator<Living> byAge = Comparator.comparing(Living::getDate_of_birth).reversed();
+
+            livingList.sort(byName.thenComparing(byAge));
+            return livingList;
+        }
     }
 
 }

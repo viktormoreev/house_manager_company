@@ -30,7 +30,6 @@ public class Company extends IdGenerator{
     public String toString() {
         return "Company{" +
                 "name='" + name + '\'' +
-                ", buildingManagers=" + buildingManagers +
                 "} " + super.toString();
     }
 }

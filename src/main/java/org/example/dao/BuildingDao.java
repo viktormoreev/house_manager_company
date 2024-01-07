@@ -13,6 +13,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.persistence.criteria.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -118,6 +119,54 @@ public class BuildingDao {
             transaction.commit();
         }
 
+    }
+
+    public static BigDecimal buildingDueAmount(Long buildingId) {
+        BigDecimal totalDueAmount = BigDecimal.ZERO; // Default to zero
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            String jpql = "SELECT SUM(tp.toPay) AS TotalIncome " +
+                    "FROM Building b " +
+                    "JOIN b.apartments a " +
+                    "JOIN a.taxesToPay tp " +
+                    "WHERE b.id =:buildingId";
+
+            totalDueAmount = session.createQuery(jpql, BigDecimal.class)
+                    .setParameter("buildingId", buildingId) // Assuming the ID is of type Long
+                    .getSingleResult();
+        }
+
+        return totalDueAmount;
+    }
+
+    public static BigDecimal buildingIncome(Long buildingId) {
+        BigDecimal totalIncome = BigDecimal.ZERO; // Default to zero
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            String jpql = "SELECT SUM(tp.payed) AS TotalIncome " +
+                    "FROM Building b " +
+                    "JOIN b.apartments a " +
+                    "JOIN a.taxesToPay tp " +
+                    "WHERE b.id =:buildingId";
+
+            totalIncome = session.createQuery(jpql, BigDecimal.class)
+                    .setParameter("buildingId", buildingId) // Assuming the ID is of type Long
+                    .getSingleResult();
+        }
+
+        return totalIncome;
+    }
+
+    public static Building findBuildingByTaxId( Long taxesToPayId){
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            String jpql = "SELECT b " +
+                    "FROM TaxesToPay tp " +
+                    "JOIN tp.apartment a " +
+                    "JOIN a.building b " +
+                    "WHERE tp.id =:taxesToPayId";
+            Building building = session.createQuery(jpql, Building.class)
+                    .setParameter("taxesToPayId", taxesToPayId)
+                    .getSingleResult();
+            return building;
+        }
     }
 
 
