@@ -199,7 +199,7 @@ public class ApartmentDao {
      * @param taxesToPayId The tax ID associated with the apartment.
      * @return The Apartment object associated with the given tax ID.
      */
-    public static Apartment findApartmentByTaxId( Long taxesToPayId){
+    public static Apartment findApartmentByTaxId(Long taxesToPayId){
         try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
             String jpql = "SELECT a " +
                     "FROM TaxesToPay tp " +

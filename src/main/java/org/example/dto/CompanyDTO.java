@@ -11,6 +11,7 @@ import org.example.entity.Company;
 public class CompanyDTO {
     private Long id;
     private String name;
+
     public CompanyDTO(Company company) {
         this.id = company.getId();
         this.name = company.getName();

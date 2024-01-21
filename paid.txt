@@ -39,3 +39,11 @@
  Apartment: 2
  Tax: 10
 
+ Date: 2024-01-10
+ Company: DHL
+ Building Manager: Gosho
+ Building: 1
+ Building address: 5
+ Apartment: 1
+ Tax: 34.00
+

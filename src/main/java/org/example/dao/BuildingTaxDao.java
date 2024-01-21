@@ -141,7 +141,7 @@ public class BuildingTaxDao {
             cr.select(root).where(cb.equal(root.get("building"),apartment.getBuilding().getId()));
             Query<BuildingTaxes> query = session.createQuery(cr);
             BuildingTaxes buildingTaxes = query.getSingleResult();
-            System.out.println(buildingTaxes);
+            //System.out.println(buildingTaxes);
             BigDecimal finalTax = apartment.getArea().multiply(buildingTaxes.getPer_square_footage());
             finalTax = finalTax.add(buildingTaxes.getPer_pet().multiply(BigDecimal.valueOf(apartment.getPet())));
 
