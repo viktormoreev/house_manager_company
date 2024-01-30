@@ -1,11 +1,7 @@
-This is project which I did for my education in New Bulgarian University.
-It handles Java and specificly hibernate application which did make requests to the database. 
-My task was to create an 'Electronic Property Manager' application for use by companies providing
-professional property maintenance services in multifamily buildings. Each building has apartments 
-located on specific floors, each with characteristics such as apartment number, area, owner, 
-and occupants. Maintenance fees for each property are determined based on the apartment's size,
-an additional amount per occupant over 7 years old who uses the elevator, and an added fee if there's a
-pet using common areas. Residents in the building collectively pay these fees monthly. 
-Each building is serviced by one employee from the contracting company, initially assigned
-to the employee with the fewest assigned buildings. When an employee with assigned buildings leaves,
-their buildings are redistributed among the remaining employees.
+This project, completed as part of my education at New Bulgarian University, represents an innovative software application that leverages Java and Hibernate technologies. Its primary purpose is to streamline the management of multifamily buildings, catering specifically to companies specializing in professional property maintenance services.
+
+In each multifamily building, there are apartments situated on various floors, each characterized by distinct attributes, including apartment number, floor area, owner details, and tenant information. Maintenance fees for each property are meticulously calculated based on several factors: the apartment's size, an additional charge per occupant over the age of seven who utilizes the elevator, and an additional fee if there is a pet utilizing the common areas. These fees are collectively paid by the building's residents on a monthly basis.
+
+Each building is serviced by a dedicated employee from the contracting company, initially assigned to the employee with the fewest associated buildings. In the event that an employee with assigned buildings departs, their properties are seamlessly redistributed among the remaining employees.
+
+This project not only showcases my proficiency in software development but also addresses a real-world need in the property management sector. By efficiently handling property data, calculating maintenance fees, and automating employee assignment, it enhances the overall efficiency and productivity of property management companies
